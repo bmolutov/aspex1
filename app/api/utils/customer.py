@@ -2,14 +2,12 @@ from sqlalchemy.orm import Session
 from fastapi import HTTPException
 
 from app.db.models.customer import Customer
-from app.db.schemas.customer import CustomerCreate
+from app.db.schemas.customer import CustomerInDB
 from app.db.models.booking import Booking
 
 
 def get_customer(db: Session, customer_id: int):
-    customer = db.query(Customer).filter(Customer.id == customer_id).first()
-    if not customer:
-        raise HTTPException(status_code=404, detail='Customer not found')
+    return db.query(Customer).filter(Customer.id == customer_id).first()
 
 
 def get_customer_by_email(db: Session, email: str):
@@ -20,7 +18,7 @@ def get_customers(db: Session, skip: int = 0, limit: int = 100):
     return db.query(Customer).offset(skip).limit(limit).all()
 
 
-def create_customer(db: Session, customer: CustomerCreate):
+def create_customer(db: Session, customer: CustomerInDB):
     # todo: how to hash password?
     fake_hashed_password = customer.password + "notreallyhashed"
     db_customer = Customer(email=customer.email, hashed_password=fake_hashed_password)

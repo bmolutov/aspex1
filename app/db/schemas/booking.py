@@ -32,9 +32,9 @@ class BookingCreate(BookingBase):
 
 
 # final schemas
-class Table(TableBase):
+class TableSchema(TableBase):
     bookings: list[BookingBase] = []
 
 
-class Booking(BookingBase):
+class BookingSchema(BookingBase):
     tables: list[TableBase] = []
