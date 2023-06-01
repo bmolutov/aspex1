@@ -1,17 +1,21 @@
 from fastapi import Depends, APIRouter, HTTPException, Response
+from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Annotated
 
 from app.db.database import get_db
 from app.db.schemas.booking import BookingCreate, BookingSchema, BookingUpdate
 from app.api.utils.booking import create_booking, get_bookings, cancel_booking, update_booking
 
 
-router = APIRouter(prefix='/bookings')
+router = APIRouter(tags=["bookings"])
+
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
 @router.post("/book/")
-def book(booking: BookingCreate, db: Session = Depends(get_db)):
+def book(booking: BookingCreate, token: Annotated[str, Depends(oauth2_scheme)], db: Session = Depends(get_db)):
     booking_id = create_booking(db, booking)
     if booking_id == -1:
         raise HTTPException(status_code=400, detail="An error occurred while booking")
@@ -19,7 +23,7 @@ def book(booking: BookingCreate, db: Session = Depends(get_db)):
 
 
 @router.post("/unbook/")
-def unbook(booking_id: int, db: Session = Depends(get_db)):
+def unbook(booking_id: int, token: Annotated[str, Depends(oauth2_scheme)], db: Session = Depends(get_db)):
     is_canceled = cancel_booking(db, booking_id)
     if not is_canceled:
         raise HTTPException(status_code=403, detail="You are not allowed to cancel booking")
@@ -27,7 +31,7 @@ def unbook(booking_id: int, db: Session = Depends(get_db)):
 
 
 @router.put("/update/")
-def update(new_booking: BookingUpdate, db: Session = Depends(get_db)):
+def update(new_booking: BookingUpdate, token: Annotated[str, Depends(oauth2_scheme)], db: Session = Depends(get_db)):
     is_updated = update_booking(db, new_booking)
     if not is_updated:
         raise HTTPException(status_code=404, detail="Booking is not found")

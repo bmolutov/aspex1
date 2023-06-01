@@ -11,7 +11,7 @@ from app.api.utils.customer import get_customer_by_email, create_customer, get_c
 from app.api.utils.auth import get_current_active_user
 
 
-router = APIRouter(prefix='/customers')
+router = APIRouter(tags=["customers"])
 
 
 # todo: error

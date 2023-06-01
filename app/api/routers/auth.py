@@ -12,10 +12,10 @@ from app.db.schemas.token import Token
 from app.db.database import get_db
 
 
-router = APIRouter(prefix='/token')
+router = APIRouter(tags=["auth"])
 
 
-@router.post("/get/", response_model=Token)
+@router.post("/token", response_model=Token)
 async def login_for_access_token(
         form_data: Annotated[OAuth2PasswordRequestForm, Depends()], db: Session = Depends(get_db)
 ):
