@@ -1,11 +1,11 @@
-from typing import List, Annotated
+from typing import Annotated
 
 from fastapi import Depends, APIRouter
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 
 from app.db.database import get_db
-from app.db.schemas.booking import TableBase, TableCreate, TableSchema
+from app.db.schemas.booking import TableCreate, TableSchema
 from app.api.utils.table import get_unbooked_tables, create_table, get_tables, get_tables_verbose
 
 

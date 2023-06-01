@@ -8,7 +8,6 @@ from sqlalchemy.orm import Session
 
 from app.api.utils.auth import ACCESS_TOKEN_EXPIRE_MINUTES, create_access_token, authenticate_user
 from app.db.schemas.token import Token
-# from app.main import get_db
 from app.db.database import get_db
 
 

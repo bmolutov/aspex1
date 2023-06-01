@@ -1,7 +1,4 @@
-from datetime import datetime
-
 from sqlalchemy.orm import Session, joinedload
-from sqlalchemy.sql import func
 from sqlalchemy import text
 from fastapi import HTTPException
 
