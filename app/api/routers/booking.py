@@ -12,7 +12,10 @@ router = APIRouter(prefix='/bookings')
 
 @router.post("/book/")
 def book(booking: BookingCreate, db: Session = Depends(get_db)):
-    return create_booking(db, booking)
+    booking_id = create_booking(db, booking)
+    if booking_id == -1:
+        raise HTTPException(status_code=400, detail="An error occurred while booking")
+    return Response(status_code=200, content=f"Success, booking with id={booking_id} is created")
 
 
 @router.post("/unbook/")

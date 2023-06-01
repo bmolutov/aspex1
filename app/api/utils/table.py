@@ -29,6 +29,12 @@ def get_unbooked_tables(db: Session):
                 INNER JOIN bookings ON booking_table.booking_id = bookings.id
             GROUP BY booking_table.table_id
             HAVING MAX(bookings.booking_time_end) <= (SELECT NOW())
+        )
+        UNION
+        SELECT id, capacity, available_time_start, available_time_end 
+        FROM tables
+        WHERE id NOT IN (
+            SELECT table_id FROM booking_table 
         );
         """
     )

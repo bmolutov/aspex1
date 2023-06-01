@@ -40,16 +40,16 @@ def create_booking(db: Session, booking: BookingCreate):
     rows = db.execute(query)
     unbooked_tables = [row[0] for row in rows]
 
-    print()
-    print(unbooked_tables)
-    print()
+    # we cannot book when there is no unbooked tables from input
+    if not unbooked_tables:
+        return -1
 
     for table_id in tables:
         if table_id not in unbooked_tables:
             continue
         add_table_to_booking(db, booking_id=db_booking.id, table_id=table_id)
 
-    return db_booking
+    return db_booking.id
 
 
 def cancel_booking(db: Session, booking_id: int):
