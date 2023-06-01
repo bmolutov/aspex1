@@ -22,13 +22,13 @@ def list_tables_unbooked(db: Session = Depends(get_db)):
     return tables
 
 
-@router.get("/list/")
-def list_tables(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    tables = get_tables(db, skip=skip, limit=limit)
-    return tables
+# @router.get("/list/")
+# def list_tables(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+#     tables = get_tables(db, skip=skip, limit=limit)
+#     return tables
 
 
-@router.get("/list/verbose/")
-def list_tables_verbose(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    tables = get_tables_verbose(db, skip=skip, limit=limit)
-    return tables
+# @router.get("/list/verbose/")
+# def list_tables_verbose(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+#     tables = get_tables_verbose(db, skip=skip, limit=limit)
+#     return tables

@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy.sql import text
 from fastapi import HTTPException
+from datetime import datetime
 
 from app.db.models.booking import Booking, Table
 from app.db.schemas.booking import BookingCreate
@@ -39,12 +40,32 @@ def create_booking(db: Session, booking: BookingCreate):
     rows = db.execute(query)
     unbooked_tables = [row[0] for row in rows]
 
+    print()
+    print(unbooked_tables)
+    print()
+
     for table_id in tables:
         if table_id not in unbooked_tables:
             continue
         add_table_to_booking(db, booking_id=db_booking.id, table_id=table_id)
 
     return db_booking
+
+
+def cancel_booking(db: Session, booking_id: int):
+    booking = db.query(Booking).filter(Booking.id == booking_id).first()
+    if not booking:
+        return False
+    time_diff = datetime.now() - booking.booking_time_start
+    minutes_diff = time_diff.total_seconds() // 60
+
+    if minutes_diff > 60:
+        return False
+
+    booking.booking_time_end = datetime.now()
+    db.commit()
+    db.refresh(booking)
+    return True
 
 
 def add_table_to_booking(db: Session, booking_id: int, table_id: int):
