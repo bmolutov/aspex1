@@ -23,6 +23,12 @@ class BookingCreate(BookingBase):
     tables: List[int] = []
 
 
+class BookingUpdate(BaseModel):
+    id: int
+    booking_time_start: datetime
+    booking_time_end: datetime
+
+
 class Table(TableBase):
     id: int
 

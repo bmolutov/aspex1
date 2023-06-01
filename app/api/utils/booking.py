@@ -4,7 +4,7 @@ from fastapi import HTTPException
 from datetime import datetime
 
 from app.db.models.booking import Booking, Table
-from app.db.schemas.booking import BookingCreate
+from app.db.schemas.booking import BookingCreate, BookingUpdate
 
 
 def get_bookings(db: Session, skip: int = 0, limit: int = 100):
@@ -63,6 +63,17 @@ def cancel_booking(db: Session, booking_id: int):
         return False
 
     booking.booking_time_end = datetime.now()
+    db.commit()
+    db.refresh(booking)
+    return True
+
+
+def update_booking(db: Session, new_booking: BookingUpdate):
+    booking = db.query(Booking).filter(Booking.id == new_booking.id).first()
+    if not booking:
+        return False
+    booking.booking_time_start = new_booking.booking_time_start
+    booking.booking_time_end = new_booking.booking_time_end
     db.commit()
     db.refresh(booking)
     return True
