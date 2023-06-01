@@ -1,4 +1,8 @@
-from sqlalchemy.orm import Session
+from datetime import datetime
+
+from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.sql import func
+from sqlalchemy import text
 from fastapi import HTTPException
 
 from app.db.models.booking import Booking, Table
@@ -9,6 +13,30 @@ def get_tables(db: Session, skip: int = 0, limit: int = 100):
     return db.query(Table).offset(skip).limit(limit).all()
 
 
+# verbose - with info of all bookings related to the tables
+def get_tables_verbose(db: Session, skip: int = 0, limit: int = 100):
+    return db.query(Table).options(joinedload(Table.bookings)).offset(skip).limit(limit).all()
+
+
+def get_unbooked_tables(db: Session):
+    query = text(
+        """
+        SELECT id, capacity, available_time_start, available_time_end
+        FROM tables
+        WHERE id IN (
+            SELECT booking_table.table_id
+            FROM booking_table
+                INNER JOIN bookings ON booking_table.booking_id = bookings.id
+            GROUP BY booking_table.table_id
+            HAVING MAX(bookings.booking_time_end) <= (SELECT NOW())
+        );
+        """
+    )
+    rows = db.execute(query)
+    tables = [Table(id=row[0], capacity=row[1], available_time_start=row[2], available_time_end=row[3]) for row in rows]
+    return tables
+
+
 def create_table(db: Session, table: TableCreate):
     db_table = Table(**table.dict())
     db.add(db_table)
@@ -17,6 +45,7 @@ def create_table(db: Session, table: TableCreate):
     return db_table
 
 
+# todo: unnecessary function, it is mirror of add_table_to_booking
 def add_booking_to_table(db: Session, table_id: int, booking_id: int):
     table = db.query(Table).filter(Table.id == table_id).first()
     booking = db.query(Booking).filter(Booking.id == booking_id).first()
@@ -30,6 +59,7 @@ def add_booking_to_table(db: Session, table_id: int, booking_id: int):
     return {"message": "Booking added to table successfully"}
 
 
+# todo: unnecessary function, it is mirror of remove table from booking
 def remove_booking_from_table(db: Session, table_id: int, booking_id: int):
     table = db.query(Table).filter(Table.id == table_id).first()
     booking = db.query(Booking).filter(Booking.id == booking_id).first()

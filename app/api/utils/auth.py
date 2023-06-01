@@ -5,37 +5,17 @@ from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt # noqa
 from passlib.context import CryptContext
-from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from app.db.schemas.customer import CustomerSchema
 from app.api.utils.customer import get_customer_by_email
+from app.db.schemas.token import TokenData
 
 # to get a string like this run:
 # openssl rand -hex 32
 SECRET_KEY = "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
-
-
-class Token(BaseModel):
-    access_token: str
-    token_type: str
-
-
-class TokenData(BaseModel):
-    email: str | None = None
-
-
-# class User(BaseModel):
-#     username: str
-#     email: str | None = None
-#     full_name: str | None = None
-#     disabled: bool | None = None
-
-
-# class UserInDB(User):
-#     hashed_password: str
 
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")

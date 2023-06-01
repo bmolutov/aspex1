@@ -1,4 +1,5 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.sql import text
 from fastapi import HTTPException
 
 from app.db.models.booking import Booking, Table
@@ -6,18 +7,43 @@ from app.db.schemas.booking import BookingCreate
 
 
 def get_bookings(db: Session, skip: int = 0, limit: int = 100):
-    return db.query(Booking).offset(skip).limit(limit).all()
+    return db.query(Booking).options(joinedload(Booking.tables)).offset(skip).limit(limit).all()
 
 
 def get_bookings_of_customer(db: Session, customer_id: int, skip: int = 0, limit: int = 100):
     return db.query(Booking).filter(customer_id=customer_id).offset(skip).limit(limit).all()
 
 
-def create_booking(db: Session, booking: BookingCreate, customer_id: int):
-    db_booking = Booking(**booking.dict(), customer_id=customer_id)
+def create_booking(db: Session, booking: BookingCreate):
+    booking_dict = booking.dict()
+    tables = booking_dict.pop("tables", None)
+    db_booking = Booking(**booking_dict)
     db.add(db_booking)
     db.commit()
     db.refresh(db_booking)
+
+    query = text(
+        """
+        SELECT booking_table.table_id
+        FROM booking_table
+            LEFT OUTER JOIN bookings ON booking_table.booking_id = bookings.id
+        GROUP BY booking_table.table_id
+        HAVING MAX(bookings.booking_time_end) <= (SELECT NOW())
+        UNION
+        SELECT id FROM tables
+        WHERE id NOT IN (
+            SELECT table_id FROM booking_table 
+        );
+        """
+    )
+    rows = db.execute(query)
+    unbooked_tables = [row[0] for row in rows]
+
+    for table_id in tables:
+        if table_id not in unbooked_tables:
+            continue
+        add_table_to_booking(db, booking_id=db_booking.id, table_id=table_id)
+
     return db_booking
 
 

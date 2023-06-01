@@ -1,13 +1,18 @@
+from typing import List
 from pydantic import BaseModel
-from booking import BookingSchema
+
+from app.db.schemas.booking import BookingSchema
 
 
 class CustomerBase(BaseModel):
     email: str
 
 
-class CustomerInDB(CustomerBase):
-    hashed_password: str
+class CustomerCreate(CustomerBase):
+    name: str
+    phone: str
+    is_active: bool
+    password: str
 
 
 class CustomerSchema(CustomerBase):
@@ -16,7 +21,7 @@ class CustomerSchema(CustomerBase):
     phone: str
     is_active: bool
 
-    bookings: list[BookingSchema] = []
+    bookings: List["BookingSchema"] = []
 
     class Config:
         orm_mode = True

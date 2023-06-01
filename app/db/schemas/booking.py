@@ -1,40 +1,46 @@
+from typing import List
 from pydantic import BaseModel
 from datetime import datetime
 
 
 class TableBase(BaseModel):
-    id: int
     capacity: int
     available_time_start: datetime
     available_time_end: datetime
-    is_booked: bool
-
-    class Config:
-        orm_mode = True
 
 
-class TableCreate(BaseModel):
+class TableCreate(TableBase):
     pass
 
 
 class BookingBase(BaseModel):
-    id: int
     customer_id: int
     booking_time_start: datetime
     booking_time_end: datetime
+
+
+class BookingCreate(BookingBase):
+    tables: List[int] = []
+
+
+class Table(TableBase):
+    id: int
+
+
+class Booking(BookingBase):
+    id: int
+
+
+# final schemas
+class TableSchema(Table):
+    bookings: List[BookingBase] = []
 
     class Config:
         orm_mode = True
 
 
-class BookingCreate(BookingBase):
-    pass
+class BookingSchema(Booking):
+    tables: List[TableBase] = []
 
-
-# final schemas
-class TableSchema(TableBase):
-    bookings: list[BookingBase] = []
-
-
-class BookingSchema(BookingBase):
-    tables: list[TableBase] = []
+    class Config:
+        orm_mode = True

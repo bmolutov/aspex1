@@ -14,4 +14,4 @@ class Customer(Base):
     hashed_password = Column(String)
     is_active = Column(Boolean, default=True)
 
-    bookings = relationship("Bookings", back_populates="customer")
+    bookings = relationship("Booking", back_populates="customer")

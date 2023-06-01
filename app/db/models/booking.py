@@ -29,6 +29,5 @@ class Table(Base):
     capacity = Column(Integer, default=2)
     available_time_start = Column(DateTime, default=time(12, 0))
     available_time_end = Column(DateTime, default=time(22, 0))
-    is_booked = Column(Boolean, default=False)
 
     bookings = relationship("Booking", secondary="booking_table", back_populates="tables")
