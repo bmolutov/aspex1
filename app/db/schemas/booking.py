@@ -19,7 +19,9 @@ class BookingBase(BaseModel):
     booking_time_end: datetime
 
 
-class BookingCreate(BookingBase):
+class BookingCreate(BaseModel):
+    booking_time_start: datetime
+    booking_time_end: datetime
     tables: List[int] = []
 
 

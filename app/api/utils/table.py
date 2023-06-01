@@ -10,12 +10,12 @@ from app.db.schemas.booking import TableCreate
 
 
 def get_tables(db: Session, skip: int = 0, limit: int = 100):
-    return db.query(Table).offset(skip).limit(limit).all()
+    return db.query(Table).filter(Table.is_active).offset(skip).limit(limit).all()
 
 
 # verbose - with info of all bookings related to the tables
 def get_tables_verbose(db: Session, skip: int = 0, limit: int = 100):
-    return db.query(Table).options(joinedload(Table.bookings)).offset(skip).limit(limit).all()
+    return db.query(Table).filter(Table.is_active).options(joinedload(Table.bookings)).offset(skip).limit(limit).all()
 
 
 def get_unbooked_tables(db: Session):
@@ -29,13 +29,13 @@ def get_unbooked_tables(db: Session):
                 INNER JOIN bookings ON booking_table.booking_id = bookings.id
             GROUP BY booking_table.table_id
             HAVING MAX(bookings.booking_time_end) <= (SELECT NOW())
-        )
+        ) AND is_active = true
         UNION
         SELECT id, capacity, available_time_start, available_time_end 
         FROM tables
         WHERE id NOT IN (
             SELECT table_id FROM booking_table 
-        );
+        ) AND is_active = true;
         """
     )
     rows = db.execute(query)
@@ -53,8 +53,8 @@ def create_table(db: Session, table: TableCreate):
 
 # todo: unnecessary function, it is mirror of add_table_to_booking
 def add_booking_to_table(db: Session, table_id: int, booking_id: int):
-    table = db.query(Table).filter(Table.id == table_id).first()
-    booking = db.query(Booking).filter(Booking.id == booking_id).first()
+    table = db.query(Table).filter(Table.id == table_id, Table.is_active).first()
+    booking = db.query(Booking).filter(Booking.id == booking_id, Booking.is_active).first()
 
     if not table or not booking:
         raise HTTPException(status_code=404, detail='Booking or Table not found')
@@ -67,8 +67,8 @@ def add_booking_to_table(db: Session, table_id: int, booking_id: int):
 
 # todo: unnecessary function, it is mirror of remove table from booking
 def remove_booking_from_table(db: Session, table_id: int, booking_id: int):
-    table = db.query(Table).filter(Table.id == table_id).first()
-    booking = db.query(Booking).filter(Booking.id == booking_id).first()
+    table = db.query(Table).filter(Table.id == table_id, Table.is_active).first()
+    booking = db.query(Booking).filter(Booking.id == booking_id, Booking.is_active).first()
 
     if not table or not booking:
         raise HTTPException(status_code=404, detail='Booking or Table not found')

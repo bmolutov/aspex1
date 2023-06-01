@@ -61,7 +61,7 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
     return encoded_jwt
 
 
-async def get_current_customer(db: Session, token: Annotated[str, Depends(oauth2_scheme)]):
+def get_current_customer(db: Session, token: Annotated[str, Depends(oauth2_scheme)]):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -81,9 +81,9 @@ async def get_current_customer(db: Session, token: Annotated[str, Depends(oauth2
     return customer
 
 
-async def get_current_active_user(
+def get_current_active_customer(
     current_user: Annotated[CustomerSchema, Depends(get_current_customer)]
 ):
     if not current_user.is_active:
-        raise HTTPException(status_code=400, detail="Inactive user")
+        raise HTTPException(status_code=400, detail="Inactive customer")
     return current_user

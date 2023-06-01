@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, DateTime, Table
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, DateTime, Table, CheckConstraint
 from sqlalchemy.orm import relationship
 from datetime import time
 
@@ -17,6 +17,7 @@ class Booking(Base):
     booking_time_start = Column(DateTime, default=time(14, 0))
     booking_time_end = Column(DateTime, default=time(17, 0))
     customer_id = Column(Integer, ForeignKey("customers.id"))
+    is_active = Column(Boolean, default=True)
 
     customer = relationship("Customer", back_populates="bookings")
     tables = relationship("Table", secondary="booking_table", back_populates="bookings")
@@ -29,5 +30,10 @@ class Table(Base):
     capacity = Column(Integer, default=2)
     available_time_start = Column(DateTime, default=time(12, 0))
     available_time_end = Column(DateTime, default=time(22, 0))
+    is_active = Column(Boolean, default=True)
 
     bookings = relationship("Booking", secondary="booking_table", back_populates="tables")
+
+    __table_args__ = (
+        CheckConstraint('capacity >= 2', name='min_table_capacity'),
+    )

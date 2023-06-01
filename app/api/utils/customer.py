@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import text
-from fastapi import HTTPException
+from fastapi import HTTPException, Response
 
 from app.db.models.customer import Customer
 from app.db.schemas.customer import CustomerCreate
@@ -23,11 +23,14 @@ def create_customer(db: Session, customer: CustomerCreate):
     from app.api.utils.auth import get_password_hash
     # todo: check hashing in future
     hashed_password = get_password_hash(customer.password)
-    db_customer = Customer(email=customer.email, hashed_password=hashed_password)
-    db.add(db_customer)
-    db.commit()
-    db.refresh(db_customer)
-    return db_customer
+    try:
+        db_customer = Customer(email=customer.email, hashed_password=hashed_password)
+        db.add(db_customer)
+        db.commit()
+        db.refresh(db_customer)
+        return Response(status_code=201, content="Customer created successfully")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="An error occurred while creating the user")
 
 
 def add_booking_to_customer(db: Session, customer_id: int, booking_id: int):
