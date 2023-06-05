@@ -28,15 +28,6 @@ COPY . /app/
 # Expose the port on which the application will run
 EXPOSE 8000
 
-# Initialize and migrate the database
-RUN service postgresql start && \
-    su - postgres -c "psql -c 'CREATE DATABASE aspex1_db;'" && \
-    su - postgres -c "psql -c 'CREATE USER aspex1_user WITH ENCRYPTED PASSWORD '\''qwerty'\'';'" && \
-    su - postgres -c "psql -c 'GRANT ALL PRIVILEGES ON DATABASE aspex1_db TO aspex1_user;'"
-
-# todo: do we need it?
-# RUN python -m alembic upgrade head
-
 # Run the FastAPI application
 # CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
 CMD uvicorn app.main:app --host 0.0.0.0 --port 8000
