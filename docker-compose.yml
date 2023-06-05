@@ -1,0 +1,18 @@
+version: '3'
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 8000:8000
+    depends_on:
+      - db
+  db:
+    image: postgres:15.3
+    environment:
+      - POSTGRES_DB=aspex1_db
+      - POSTGRES_USER=aspex1_user
+      - POSTGRES_PASSWORD=qwerty
+    ports:
+      - 5432:5432
